@@ -25,10 +25,9 @@ def findTask(to_find: str):
                                         params=auth_params).json()
         for task in column_tasks:
             if to_find == task['name']:
-                print('"{}" is in "{}" table'.format(to_find, column['name']))
-                return True
-            else:
-                return False
+                return '"{}" is already in "{}" table'.format(to_find, column['name'])
+            # if to_find != task['name']:
+            #     return 'Nothing match'
 
 
 def read():
@@ -61,6 +60,9 @@ def move(name: str, column_name: str):
     for column in column_data:
         column_tasks = requests.get(base_url.format('lists') + '/' + column['id'] + '/cards', params=auth_params).json()
         for task in column_tasks:
+            if '"{}" is already in "{}" table'.format(name, column_name) == findTask(name):
+                print('Cannot do this shit')
+                exit(1)
             if task['name'] == name:
                 task_id = task['id']
                 break
@@ -72,8 +74,6 @@ def move(name: str, column_name: str):
                          data={'value': column['id'], **auth_params})
             read()
             break
-        else:
-            print('Column "{}" was not found'.format(column_name))
 
 
 def delete(name: str, column_name: str):
