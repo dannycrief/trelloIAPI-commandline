@@ -26,8 +26,6 @@ def findTask(to_find: str):
         for task in column_tasks:
             if to_find == task['name']:
                 return '"{}" is already in "{}" table'.format(to_find, column['name'])
-            # if to_find != task['name']:
-            #     return 'Nothing match'
 
 
 def read():
@@ -43,7 +41,6 @@ def read():
 
 def create(name: str, column_name: str):
     if not findTask(name):
-        print('shit')
         read()
         exit()
     for column in column_data:
@@ -61,7 +58,6 @@ def move(name: str, column_name: str):
         column_tasks = requests.get(base_url.format('lists') + '/' + column['id'] + '/cards', params=auth_params).json()
         for task in column_tasks:
             if '"{}" is already in "{}" table'.format(name, column_name) == findTask(name):
-                print('Cannot do this shit')
                 exit(1)
             if task['name'] == name:
                 task_id = task['id']
