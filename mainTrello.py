@@ -36,24 +36,25 @@ def read():
             print('\t' + 'There are no tasks!')
             continue
         for task in task_data:
-            print('\t' + task['name'])
+            print('\t {} -----------------------------------> task id: {}'.format(task['name'], task['id']))
 
 
 def create(name: str, column_name: str):
     if not findTask(name):
         read()
-        exit()
+        exit(1)
     for column in column_data:
         if column['name'] == column_name:
             requests.post(base_url.format('cards'), data={'name': name, 'idList': column['id'], **auth_params})
-            read()
             break
         else:
             print('Column "{}" was not found'.format(column_name))
+    read()
 
 
 def move(name: str, column_name: str):
     task_id = None
+    task_name = None
     for column in column_data:
         column_tasks = requests.get(base_url.format('lists') + '/' + column['id'] + '/cards', params=auth_params).json()
         for task in column_tasks:
@@ -61,6 +62,7 @@ def move(name: str, column_name: str):
                 exit(1)
             if task['name'] == name:
                 task_id = task['id']
+                task_name = task['name']
                 break
         if task_id:
             break
@@ -68,8 +70,15 @@ def move(name: str, column_name: str):
         if column['name'] == column_name:
             requests.put(base_url.format('cards') + '/' + task_id + '/idList',
                          data={'value': column['id'], **auth_params})
-            read()
+
             break
+        else:
+            print(task_name + ':' + task_id + '. Column name: ' + column['name'] + 'Column id: ' + column['id'])
+            if input('Table does not exists. Do you want to create it? (y/N)') == 'y':
+                addTable(column_name)
+                move(name, column_name)
+            else:
+                break
 
 
 def delete(name: str, column_name: str):
@@ -81,10 +90,10 @@ def delete(name: str, column_name: str):
                 if task['name'] == name:
                     requests.request("DELETE", base_url.format('cards') + '/' + task['id'], params=auth_params)
                     print('\n' + task['name'] + ' was deleted\n')
-                    read()
                     break
                 else:
                     print('Task "{}" was not found'.format(name))
+    read()
 
 
 def addTable(column_name):
@@ -101,8 +110,7 @@ def addTable(column_name):
             **auth_params
         })
         print('Column {} successfully created'.format(column_name))
-        print(response.text)
-        read()
+    return
 
 
 def checkArguments():
